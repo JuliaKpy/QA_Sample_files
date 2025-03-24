@@ -1,0 +1,23 @@
+Message: no such element: Unable to locate element: {"method":"xpath","selector":"//a[@aria-label='Home']"}
+  (Session info: chrome=134.0.6998.35); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+#0 0x621c01df9ffa <unknown>
+#1 0x621c018b8970 <unknown>
+#2 0x621c0190a385 <unknown>
+#3 0x621c0190a5b1 <unknown>
+#4 0x621c019593c4 <unknown>
+#5 0x621c019302bd <unknown>
+#6 0x621c0195670c <unknown>
+#7 0x621c01930063 <unknown>
+#8 0x621c018fc328 <unknown>
+#9 0x621c018fd491 <unknown>
+#10 0x621c01dc142b <unknown>
+#11 0x621c01dc52ec <unknown>
+#12 0x621c01da8a22 <unknown>
+#13 0x621c01dc5e64 <unknown>
+#14 0x621c01d8cbef <unknown>
+#15 0x621c01de8558 <unknown>
+#16 0x621c01de8736 <unknown>
+#17 0x621c01df8e76 <unknown>
+#18 0x7ce87c29caa4 <unknown>
+#19 0x7ce87c329c3c <unknown>

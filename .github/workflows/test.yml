@@ -1,0 +1,55 @@
+name: Run Selenium Tests
+
+on:
+  push:
+    branches:
+      - main  # Runs on push to main branch
+  pull_request:
+    branches:
+      - main  # Runs on PR to main branch
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'  # Adjust based on your project
+
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install selenium pytest allure-pytest
+          sudo apt-get install -y xvfb  # Needed for running headless Chrome
+
+      - name: Set up Chrome & Chromedriver
+        run: |
+          sudo apt-get install -y google-chrome-stable
+          CHROME_VERSION=$(google-chrome --version | awk '{print $3}')
+          wget https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
+          chmod +x /usr/local/bin/chromedriver
+
+      - name: Run Tests with Pytest
+        run: |
+          pytest --alluredir=allure-results -v || exit 1
+
+      - name: Upload Allure Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-results
+          path: allure-results
+          retention-days: 7  # Keep reports for 7 days
+
+      - name: Upload Test Logs (if failed)
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-logs
+          path: "*.log"
