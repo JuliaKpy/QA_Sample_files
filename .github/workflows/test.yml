@@ -9,7 +9,23 @@ on:
       - main  # Runs on PR to main branch
 
 jobs:
+  push_code:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add .
+          git commit -m "Automated commit after successful tests"
+          git push
+
   test:
+    needs: push_code  # Ensures testing runs after pushing new code
     runs-on: ubuntu-latest
 
     steps:
@@ -19,7 +35,15 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'  # Adjust based on your project
+          python-version: '3.9'
+
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Install Dependencies
         run: |
@@ -30,7 +54,7 @@ jobs:
       - name: Set up Chrome & Chromedriver
         run: |
           sudo apt-get install -y google-chrome-stable
-          CHROME_VERSION=$(google-chrome --version | awk '{print $3}')
+          CHROME_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE)
           wget https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip
           unzip chromedriver_linux64.zip
           sudo mv chromedriver /usr/local/bin/
@@ -38,15 +62,15 @@ jobs:
 
       - name: Run FrontEnd and BackEnd Tests with Pytest
         run: |
-          pytest BackEnd_LControl.py --alluredir=allure-results -v
-          pytest FrontEnd_LControl.py --alluredir=allure-results -v
+          pytest backEnd_LControl.py --alluredir=allure-results -v --headless
+          pytest frontEnd_LControl.py --alluredir=allure-results -v --headless
 
       - name: Upload Allure Reports
         uses: actions/upload-artifact@v3
         with:
           name: allure-results
           path: allure-results
-          retention-days: 7  # Keep reports for 7 days
+          retention-days: 7
 
       - name: Upload Test Logs (if failed)
         if: failure()
@@ -54,3 +78,15 @@ jobs:
         with:
           name: test-logs
           path: "*.log"
+
+      - name: Generate Allure Report
+        run: |
+            pip install allure-commandline
+            allure generate allure-results -o allure-report --clean
+      
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            publish_dir: ./allure-report
+      
