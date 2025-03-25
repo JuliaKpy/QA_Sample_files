@@ -36,9 +36,10 @@ jobs:
           sudo mv chromedriver /usr/local/bin/
           chmod +x /usr/local/bin/chromedriver
 
-      - name: Run Tests with Pytest
+      - name: Run FrontEnd and BackEnd Tests with Pytest
         run: |
-          pytest --alluredir=allure-results -v || exit 1
+          pytest BackEnd_LControl.py --alluredir=allure-results -v
+          pytest FrontEnd_LControl.py --alluredir=allure-results -v
 
       - name: Upload Allure Reports
         uses: actions/upload-artifact@v3
